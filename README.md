@@ -1,92 +1,85 @@
-
-# FM-GQ-M1: Financial Markets — Module 1 Graded Analytics
+"""
+# FM-GQ-M2: Financial Markets — Module 2 Graded Analytics
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/NumPy-013243?logo=numpy&logoColor=white" />
   <img src="https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white" />
   <img src="https://img.shields.io/badge/SciPy-8CAAE6?logo=scipy&logoColor=white" />
-  <img src="https://img.shields.io/badge/Financial%20Markets-Fixed%20Income-blue" />
-  <img src="https://img.shields.io/badge/Bond%20Pricing-Yields%20%26%20Duration-orange" />
+  <img src="https://img.shields.io/badge/Financial%20Markets-Derivatives%20%26%20Options-blue" />
+  <img src="https://img.shields.io/badge/Option%20Pricing-Black--Scholes%20%26%20Greeks-orange" />
 </p>
 
 ---
 
 ## Overview
-This repository documents Module 1 Graded Analytics for Financial Markets (FM). The module covers core fixed income analytics, cash flow discounting, bond pricing, Yield to Maturity ($\text{YTM}$) root-finding, Macaulay and Modified Duration, Bond Convexity, and Money Market discount yield conversions.
+This repository documents Module 2 Graded Analytics for Financial Markets (FM). The module focuses on derivative securities analytics, forward and futures pricing, arbitrage-free cost-of-carry relations, the Black-Scholes-Merton European option pricing framework, analytical option sensitivity parameters ($\text{Greeks}$), and implied volatility solving via numerical root-finding.
 
 ---
 
-## Part 1: Bond Pricing & Yield to Maturity (YTM)
+## Part 1: Forwards & Futures Pricing
 
-### Problem 1.1: Fixed-Coupon Bond Pricing
+### Problem 1.1: Cost-of-Carry Forward Pricing
 
 #### Objective
-Compute the clean price $P_0$ of a fixed-coupon bond given face value $F$, annual coupon rate $C$, compounding frequency $k$, annual yield to maturity $y$, and remaining maturity $T$ years.
+Compute the arbitrage-free forward price $F_0$ and current value $V_0$ of a forward contract written on an underlying asset with spot price $S_0$, risk-free rate $r$, continuous storage cost $u$, and continuous dividend yield $q$ over time to maturity $T$.
 
 #### Mathematical Definition
-The full price $P_0$ of a bond paying periodic coupon $c = \frac{C \cdot F}{k}$ over $n = k \cdot T$ periods is:
-$$P_0 = \sum_{t=1}^{n} \frac{c}{\left(1 + \frac{y}{k}\right)^t} + \frac{F}{\left(1 + \frac{y}{k}\right)^n}$$
+The continuous cost-of-carry model for forward pricing is:
+$$F_0 = S_0 \cdot e^{(r + u - q)T}$$
+
+The value $V_0$ of an existing long forward contract with delivery price $K$ is:
+$$V_0 = S_0 \cdot e^{(u-q)T} - K \cdot e^{-rT}$$
 
 ---
 
-### Problem 1.2: Yield to Maturity (YTM) Numerical Solving
+## Part 2: Black-Scholes-Merton European Option Pricing
+
+### Problem 2.1: BSM Call and Put Valuations
 
 #### Objective
-Solve for the annual yield to maturity $y^*$ given an observed market bond price $P_{\text{mkt}}$ using Newton-Raphson numerical root-finding.
+Value European call options ($C_0$) and put options ($P_0$) on stock $S_0$ with strike $K$, risk-free rate $r$, volatility $\sigma$, continuous dividend yield $q$, and time to maturity $T$. Verify the Put-Call Parity relationship.
+
+#### Mathematical Formulas
+Black-Scholes-Merton Formula:
+$$C_0 = S_0 \cdot e^{-qT} \cdot \mathcal{N}(d_1) - K \cdot e^{-rT} \cdot \mathcal{N}(d_2)$$
+
+$$P_0 = K \cdot e^{-rT} \cdot \mathcal{N}(-d_2) - S_0 \cdot e^{-qT} \cdot \mathcal{N}(-d_1)$$
+
+where:
+$$d_1 = \frac{\ln(S_0 / K) + \left(r - q + \frac{\sigma^2}{2}\right)T}{\sigma \sqrt{T}}, \quad d_2 = d_1 - \sigma \sqrt{T}$$
+
+Put-Call Parity Relationship:
+$$C_0 + K \cdot e^{-rT} = P_0 + S_0 \cdot e^{-qT}$$
+
+---
+
+## Part 3: Option Sensitivity Analysis ($\text{Greeks}$) & Implied Volatility
+
+### Problem 3.1: Analytical $\text{Greeks}$ Estimation
+
+#### Objective
+Compute key BSM analytical option sensitivity parameters: $\Delta$ ($\text{Delta}$), $\Gamma$ ($\text{Gamma}$), $\mathcal{V}$ ($\text{Vega}$), $\Theta$ ($\text{Theta}$), and $\rho$ ($\text{Rho}$).
+
+#### Mathematical Formulas
+$$\Delta_{\text{Call}} = e^{-qT} \cdot \mathcal{N}(d_1), \quad \Delta_{\text{Put}} = -e^{-qT} \cdot \mathcal{N}(-d_1)$$
+
+$$\Gamma = \frac{e^{-qT} \cdot n(d_1)}{S_0 \cdot \sigma \sqrt{T}}, \quad n(x) = \frac{1}{\sqrt{2\pi}} e^{-\frac{x^2}{2}}$$
+
+$$\mathcal{V} = S_0 \cdot e^{-qT} \cdot \sqrt{T} \cdot n(d_1)$$
+
+$$\Theta_{\text{Call}} = -\frac{S_0 \cdot e^{-qT} \cdot n(d_1) \cdot \sigma}{2\sqrt{T}} + q S_0 e^{-qT} \mathcal{N}(d_1) - r K e^{-rT} \mathcal{N}(d_2)$$
+
+---
+
+### Problem 3.2: Implied Volatility Root-Finding
+
+#### Objective
+Solve for the implied volatility parameter $\sigma_{\text{imp}}$ given an observed market option price $C_{\text{mkt}}$ using Newton-Raphson root-finding.
 
 #### Mathematical Formula
-Solve for $y$ in $f(y) = 0$:
-$$f(y) = \sum_{t=1}^{n} \frac{c}{\left(1 + \frac{y}{k}\right)^t} + \frac{F}{\left(1 + \frac{y}{k}\right)^n} - P_{\text{mkt}} = 0$$
-
----
-
-## Part 2: Sensitivity Analysis — Duration & Convexity
-
-### Problem 2.1: Macaulay & Modified Duration
-
-#### Objective
-Compute Macaulay Duration $D_{\text{mac}}$ (weighted average time until cash flow receipt) and Modified Duration $D_{\text{mod}}$ (price sensitivity to yield changes).
-
-#### Mathematical Formulas
-Macaulay Duration:
-$$D_{\text{mac}} = \frac{1}{P_0} \sum_{t=1}^{n} \frac{t}{k} \cdot \frac{c_t}{\left(1 + \frac{y}{k}\right)^t}$$
-
-Modified Duration:
-$$D_{\text{mod}} = \frac{D_{\text{mac}}}{1 + \frac{y}{k}}$$
-
-First-Order Price Approximation:
-$$\frac{\Delta P}{P_0} \approx -D_{\text{mod}} \cdot \Delta y$$
-
----
-
-### Problem 2.2: Bond Convexity & Taylor Series Price Estimation
-
-#### Objective
-Calculate bond convexity $C_x$ to account for curvature in the price-yield relationship and estimate price changes under large yield shifts $\Delta y$.
-
-#### Mathematical Formulas
-Convexity Measure $C_x$:
-$$C_x = \frac{1}{P_0 \cdot \left(1 + \frac{y}{k}\right)^2} \sum_{t=1}^{n} \frac{t(t+1)}{k^2} \cdot \frac{c_t}{\left(1 + \frac{y}{k}\right)^t}$$
-
-Second-Order Price Percentage Change Approximation:
-$$\frac{\Delta P}{P_0} \approx -D_{\text{mod}} \cdot \Delta y + \frac{1}{2} C_x \cdot (\Delta y)^2$$
-
----
-
-## Part 3: Money Market Rates & Day-Count Conventions
-
-### Problem 3.1: Bank Discount Yield vs. Bond Equivalent Yield
-
-#### Objective
-Convert Money Market Bank Discount Yield ($y_{\text{bd}}$) to Bond Equivalent Yield ($y_{\text{bey}}$) under Actual/365 and Actual/360 day-count conventions.
-
-#### Mathematical Formulas
-Bank Discount Yield:
-$$y_{\text{bd}} = \frac{F - P}{F} \cdot \frac{360}{t_{\text{mat}}}$$
-
-Bond Equivalent Yield ($y_{\text{bey}}$):
-$$y_{\text{bey}} = \frac{F - P}{P} \cdot \frac{365}{t_{\text{mat}}} = \frac{365 \cdot y_{\text{bd}}}{360 - (y_{\text{bd}} \cdot t_{\text{mat}})}$$
+Solve for $\sigma$ in $f(\sigma) = 0$:
+$$f(\sigma) = C_{\text{BSM}}(S_0, K, r, q, T, \sigma) - C_{\text{mkt}} = 0$$
 
 ---
 
@@ -94,232 +87,236 @@ $$y_{\text{bey}} = \frac{F - P}{P} \cdot \frac{365}{t_{\text{mat}}} = \frac{365 
 
 | Task ID | Output Parameter | Metric / Description | Theoretical Target / Formula |
 |:---|:---|:---|:---|
-| P1.1 | `bond_price` | Present value of bond cash flows | $\sum_{t=1}^n \frac{c_t}{(1+y/k)^t} + \frac{F}{(1+y/k)^n}$ |
-| P1.2 | `ytm_solved` | Annualized Yield to Maturity | Root $y^*$ of $P(y) - P_{\text{mkt}} = 0$ |
-| P2.1 | `macaulay_duration` | Cash flow weighted average time | $\frac{1}{P_0} \sum_{t=1}^n \frac{t}{k} \text{PV}(c_t)$ |
-| P2.1 | `modified_duration` | Price sensitivity per 1% yield change | $\frac{D_{\text{mac}}}{1 + y/k}$ |
-| P2.2 | `convexity` | Price-yield curvature measure | Second derivative term $\frac{1}{P_0}\frac{d^2P}{dy^2}$ |
-| P3.1 | `bey_yield` | Money market Bond Equivalent Yield | $\frac{365 \cdot y_{\text{bd}}}{360 - y_{\text{bd}} t_{\text{mat}}}$ |
+| P1.1 | $F_0$ | Cost-of-carry forward price | $S_0 \cdot e^{(r + u - q)T}$ |
+| P2.1 | $C_0, P_0$ | BSM European Call and Put values | Closed-form BSM analytic pricing |
+| P2.1 | $\text{Parity Error}$ | Put-Call Parity arbitrage check | $\|(C_0 + K e^{-rT}) - (P_0 + S_0 e^{-qT})\| = 0$ |
+| P3.1 | $\Delta, \Gamma, \mathcal{V}$ | Analytical BSM Sensitivity Greeks | Partial derivatives $\frac{\partial C}{\partial S}, \frac{\partial^2 C}{\partial S^2}, \frac{\partial C}{\partial \sigma}$ |
+| P3.2 | $\sigma_{\text{imp}}$ | Market implied volatility parameter | Root $\sigma^*$ of $C_{\text{BSM}}(\sigma) - C_{\text{mkt}} = 0$ |
 """
 
 import numpy as np
 import pandas as pd
+from scipy.stats import norm
 from scipy.optimize import newton
 
 
 # ==========================================
-# PART 1: BOND PRICING & YTM SOLVING
+# PART 1: FORWARDS & FUTURES PRICING
 # ==========================================
 
-def compute_bond_price(
-    face_value: float, 
-    coupon_rate: float, 
-    ytm: float, 
-    years_to_maturity: float, 
-    frequency: int = 2
-) -> float:
+def compute_forward_price_and_value(
+    spot_price: float, 
+    strike_price: float, 
+    risk_free_rate: float, 
+    time_to_maturity: float, 
+    storage_cost: float = 0.0, 
+    dividend_yield: float = 0.0
+) -> dict:
     """
-    Computes the clean present value price of a fixed-coupon bond.
+    Calculates cost-of-carry forward price F_0 and existing contract value V_0.
 
     Parameters
     ----------
-    face_value : float
-        Par value of the bond F.
-    coupon_rate : float
-        Annual coupon rate C (decimal).
-    ytm : float
-        Annual yield to maturity y (decimal).
-    years_to_maturity : float
+    spot_price : float
+        Current asset spot price S_0.
+    strike_price : float
+        Delivery price K of long forward contract.
+    risk_free_rate : float
+        Continuous risk-free rate r.
+    time_to_maturity : float
         Time to maturity T in years.
-    frequency : int
-        Coupon payments per year k (default = 2 for semi-annual).
+    storage_cost : float
+        Continuous storage cost rate u (default = 0.0).
+    dividend_yield : float
+        Continuous dividend yield q (default = 0.0).
 
     Returns
     -------
-    float
-        Present value bond price P_0.
+    dict
+        Forward price F_0 and current long position value V_0.
     """
-    n_periods = int(years_to_maturity * frequency)
-    coupon_pmt = (coupon_rate * face_value) / frequency
-    periodic_ytm = ytm / frequency
+    S0, K, r, T, u, q = spot_price, strike_price, risk_free_rate, time_to_maturity, storage_cost, dividend_yield
 
-    # Periods array 1..n
-    periods = np.arange(1, n_periods + 1)
-    
-    # Cash flows: coupons + par at maturity
-    cash_flows = np.full(n_periods, coupon_pmt)
-    cash_flows[-1] += face_value
+    # 1. Forward Price: F_0 = S_0 * e^{(r + u - q)T}
+    forward_price = S0 * np.exp((r + u - q) * T)
 
-    # Present value discounting
-    discount_factors = (1.0 + periodic_ytm) ** (-periods)
-    bond_price = float(np.sum(cash_flows * discount_factors))
+    # 2. Contract Value: V_0 = S_0 * e^{(u-q)T} - K * e^{-rT}
+    contract_value = S0 * np.exp((u - q) * T) - K * np.exp(-r * T)
 
-    return float(np.round(bond_price, 4))
-
-
-def solve_bond_ytm(
-    market_price: float, 
-    face_value: float, 
-    coupon_rate: float, 
-    years_to_maturity: float, 
-    frequency: int = 2
-) -> float:
-    """
-    Solves for annual Yield to Maturity (YTM) using Newton-Raphson method.
-
-    Parameters
-    ----------
-    market_price : float
-        Observed market price P_mkt.
-    face_value : float
-        Par value F.
-    coupon_rate : float
-        Annual coupon rate C.
-    years_to_maturity : float
-        Years until maturity T.
-    frequency : int
-        Payments per year k.
-
-    Returns
-    -------
-    float
-        Solved annual YTM y*.
-    """
-    def price_error(y):
-        return compute_bond_price(face_value, coupon_rate, y, years_to_maturity, frequency) - market_price
-
-    # Newton-Raphson root finding starting at coupon rate guess
-    ytm_solution = newton(price_error, x0=coupon_rate)
-
-    return float(np.round(ytm_solution, 6))
+    return {
+        'forward_price': float(np.round(forward_price, 4)),
+        'contract_value': float(np.round(contract_value, 4))
+    }
 
 
 # ==========================================
-# PART 2: DURATION & CONVEXITY ANALYTICS
+# PART 2: BLACK-SCHOLES-MERTON PRICING
 # ==========================================
 
-def compute_duration_and_convexity(
-    face_value: float, 
-    coupon_rate: float, 
-    ytm: float, 
-    years_to_maturity: float, 
-    frequency: int = 2
+def compute_bsm_option_prices(
+    spot_price: float, 
+    strike_price: float, 
+    risk_free_rate: float, 
+    volatility: float, 
+    time_to_maturity: float, 
+    dividend_yield: float = 0.0
 ) -> dict:
     """
-    Calculates Macaulay Duration, Modified Duration, and Convexity.
+    Computes European Call and Put option prices under Black-Scholes-Merton model
+    and verifies Put-Call Parity.
 
     Parameters
     ----------
-    face_value : float
-        Par value F.
-    coupon_rate : float
-        Annual coupon rate C.
-    ytm : float
-        Annual yield to maturity y.
-    years_to_maturity : float
+    spot_price : float
+        Spot stock price S_0.
+    strike_price : float
+        Strike price K.
+    risk_free_rate : float
+        Risk-free rate r.
+    volatility : float
+        Annualized return volatility \sigma.
+    time_to_maturity : float
         Maturity T in years.
-    frequency : int
-        Payment frequency k.
+    dividend_yield : float
+        Continuous dividend yield q.
 
     Returns
     -------
     dict
-        Macaulay duration, Modified duration, and Convexity.
+        Call price C_0, Put price P_0, d1, d2, and parity error.
     """
-    n_periods = int(years_to_maturity * frequency)
-    coupon_pmt = (coupon_rate * face_value) / frequency
-    periodic_ytm = ytm / frequency
+    S0, K, r, sigma, T, q = spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, dividend_yield
 
-    periods = np.arange(1, n_periods + 1)
-    time_years = periods / frequency
+    d1 = (np.log(S0 / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
 
-    cash_flows = np.full(n_periods, coupon_pmt)
-    cash_flows[-1] += face_value
+    # BSM Call & Put pricing
+    call_price = S0 * np.exp(-q * T) * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S0 * np.exp(-q * T) * norm.cdf(-d1)
 
-    discount_factors = (1.0 + periodic_ytm) ** (-periods)
-    pv_cash_flows = cash_flows * discount_factors
-    bond_price = np.sum(pv_cash_flows)
-
-    # 1. Macaulay Duration: \frac{1}{P_0} \sum t_i \cdot \text{PV}(CF_i)
-    mac_duration = np.sum(time_years * pv_cash_flows) / bond_price
-
-    # 2. Modified Duration: \frac{D_{\text{mac}}}{1 + y/k}
-    mod_duration = mac_duration / (1.0 + periodic_ytm)
-
-    # 3. Convexity: \frac{1}{P_0 (1+y/k)^2} \sum \frac{t(t+1)}{k^2} \text{PV}(CF_i)
-    convexity = np.sum(periods * (periods + 1) * pv_cash_flows) / (bond_price * (frequency**2) * ((1.0 + periodic_ytm)**2))
+    # Put-Call Parity Check: C + K e^{-rT} = P + S_0 e^{-qT}
+    lhs_parity = call_price + K * np.exp(-r * T)
+    rhs_parity = put_price + S0 * np.exp(-q * T)
+    parity_error = np.abs(lhs_parity - rhs_parity)
 
     return {
-        'bond_price': float(np.round(bond_price, 4)),
-        'macaulay_duration_years': float(np.round(mac_duration, 4)),
-        'modified_duration_years': float(np.round(mod_duration, 4)),
-        'convexity': float(np.round(convexity, 4))
+        'call_price': float(np.round(call_price, 4)),
+        'put_price': float(np.round(put_price, 4)),
+        'd1': float(np.round(d1, 6)),
+        'd2': float(np.round(d2, 6)),
+        'parity_error': float(np.round(parity_error, 8))
     }
 
 
-def estimate_price_change_taylor(
-    modified_duration: float, 
-    convexity: float, 
-    delta_y: float
+# ==========================================
+# PART 3: GREEKS & IMPLIED VOLATILITY
+# ==========================================
+
+def compute_bsm_greeks(
+    spot_price: float, 
+    strike_price: float, 
+    risk_free_rate: float, 
+    volatility: float, 
+    time_to_maturity: float, 
+    dividend_yield: float = 0.0
 ) -> dict:
     """
-    Estimates percentage price change using 1st order (Duration) 
-    and 2nd order (Duration + Convexity) Taylor expansion.
+    Computes analytical BSM Option Greeks: Delta, Gamma, Vega, Theta, and Rho.
 
     Parameters
     ----------
-    modified_duration : float
-        Modified duration D_mod.
-    convexity : float
-        Bond convexity C_x.
-    delta_y : float
-        Change in yield \Delta y (e.g. +0.01 for +100 bps).
+    spot_price : float
+        Spot price S_0.
+    strike_price : float
+        Strike K.
+    risk_free_rate : float
+        Risk-free rate r.
+    volatility : float
+        Volatility \sigma.
+    time_to_maturity : float
+        Maturity T.
+    dividend_yield : float
+        Dividend yield q.
 
     Returns
     -------
     dict
-        1st order duration estimate and 2nd order duration+convexity estimate.
+        Analytical Greeks for Call and Put options.
     """
-    # 1st order: -D_mod * \Delta y
-    pct_change_duration = -modified_duration * delta_y
+    S0, K, r, sigma, T, q = spot_price, strike_price, risk_free_rate, volatility, time_to_maturity, dividend_yield
 
-    # 2nd order: -D_mod * \Delta y + 0.5 * C_x * (\Delta y)^2
-    pct_change_convexity = pct_change_duration + 0.5 * convexity * (delta_y ** 2)
+    d1 = (np.log(S0 / K) + (r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+
+    # 1. Delta: \frac{\partial C}{\partial S}
+    delta_call = np.exp(-q * T) * norm.cdf(d1)
+    delta_put = -np.exp(-q * T) * norm.cdf(-d1)
+
+    # 2. Gamma: \frac{\partial^2 C}{\partial S^2}
+    gamma = (np.exp(-q * T) * norm.pdf(d1)) / (S0 * sigma * np.sqrt(T))
+
+    # 3. Vega: \frac{\partial C}{\partial \sigma} (per 1% vol change / 0.01)
+    vega_raw = S0 * np.exp(-q * T) * np.sqrt(T) * norm.pdf(d1)
+    vega_1pct = vega_raw * 0.01
+
+    # 4. Theta: \frac{\partial C}{\partial T} (per day / 365)
+    theta_call_raw = (- (S0 * np.exp(-q * T) * norm.pdf(d1) * sigma) / (2 * np.sqrt(T)) 
+                      + q * S0 * np.exp(-q * T) * norm.cdf(d1) 
+                      - r * K * np.exp(-r * T) * norm.cdf(d2))
+    theta_call_daily = theta_call_raw / 365.0
+
+    # 5. Rho: \frac{\partial C}{\partial r} (per 1% rate change / 0.01)
+    rho_call_raw = K * T * np.exp(-r * T) * norm.cdf(d2)
+    rho_call_1pct = rho_call_raw * 0.01
 
     return {
-        'delta_y_bps': float(np.round(delta_y * 10000.0, 1)),
-        'duration_approx_pct': float(np.round(pct_change_duration * 100.0, 4)),
-        'duration_convexity_approx_pct': float(np.round(pct_change_convexity * 100.0, 4))
+        'delta_call': float(np.round(delta_call, 4)),
+        'delta_put': float(np.round(delta_put, 4)),
+        'gamma': float(np.round(gamma, 6)),
+        'vega_1pct': float(np.round(vega_1pct, 4)),
+        'theta_call_daily': float(np.round(theta_call_daily, 4)),
+        'rho_call_1pct': float(np.round(rho_call_1pct, 4))
     }
 
 
-# ==========================================
-# PART 3: MONEY MARKET CONVERSIONS
-# ==========================================
-
-def convert_discount_to_bond_equivalent_yield(
-    bank_discount_yield: float, 
-    days_to_maturity: int
+def solve_implied_volatility(
+    market_call_price: float, 
+    spot_price: float, 
+    strike_price: float, 
+    risk_free_rate: float, 
+    time_to_maturity: float, 
+    dividend_yield: float = 0.0
 ) -> float:
     """
-    Converts a Money Market Bank Discount Yield (y_bd) to Bond Equivalent Yield (y_bey).
+    Solves for BSM implied volatility using Newton-Raphson root finding.
 
     Parameters
     ----------
-    bank_discount_yield : float
-        Annualized bank discount yield y_bd (decimal).
-    days_to_maturity : int
-        Days remaining until maturity t_mat.
+    market_call_price : float
+        Observed market price C_mkt.
+    spot_price : float
+        Spot price S_0.
+    strike_price : float
+        Strike K.
+    risk_free_rate : float
+        Risk-free rate r.
+    time_to_maturity : float
+        Maturity T.
+    dividend_yield : float
+        Dividend yield q.
 
     Returns
     -------
-    float
-        Bond Equivalent Yield y_bey (decimal).
+    dict
+        Solved implied volatility \sigma_imp.
     """
-    # y_bey = (365 * y_bd) / (360 - y_bd * t_mat)
-    bey = (365.0 * bank_discount_yield) / (360.0 - (bank_discount_yield * days_to_maturity))
+    def price_error(sigma_guess):
+        res = compute_bsm_option_prices(spot_price, strike_price, risk_free_rate, sigma_guess, time_to_maturity, dividend_yield)
+        return res['call_price'] - market_call_price
 
-    return float(np.round(bey, 6))
+    implied_vol = newton(price_error, x0=0.20)
+
+    return float(np.round(implied_vol, 6))
 
 
 # ==========================================
@@ -327,37 +324,32 @@ def convert_discount_to_bond_equivalent_yield(
 # ==========================================
 
 if __name__ == "__main__":
-    print("Executing Financial Markets Module 1 Pipeline...\n")
+    print("Executing Financial Markets Module 2 Pipeline...\n")
 
-    # Sample Bond Inputs: $1,000 Par, 6% Coupon, 5.0% YTM, 10 Years, Semi-Annual
-    F, C, y_init, T, k = 1000.0, 0.06, 0.05, 10.0, 2
+    # Sample Derivative Inputs: S0=100, K=100, r=5%, sigma=20%, T=1.0 Year, q=1%
+    S0, K, r, sigma, T, q = 100.0, 100.0, 0.05, 0.20, 1.0, 0.01
 
-    # Test Part 1: Bond Pricing & YTM Solving
-    price_calc = compute_bond_price(F, C, y_init, T, k)
-    ytm_solved = solve_bond_ytm(price_calc, F, C, T, k)
+    # Test Part 1: Forwards & Futures
+    fwd_res = compute_forward_price_and_value(S0, K, r, T, storage_cost=0.0, dividend_yield=q)
+    print("--- Part 1: Forward Contract Pricing ---")
+    print(f"Theoretical Forward Price F0: ${fwd_res['forward_price']:,.2f}")
+    print(f"Contract Current Value V0   : ${fwd_res['contract_value']:,.2f}")
 
-    print("--- Part 1: Fixed Income Pricing & YTM ---")
-    print(f"Calculated Bond Price   : ${price_calc:,.2f}")
-    print(f"Solved YTM from Price   : {ytm_solved * 100:.4f}%")
+    # Test Part 2: BSM Pricing & Parity
+    bsm_res = compute_bsm_option_prices(S0, K, r, sigma, T, q)
+    print("\n--- Part 2: Black-Scholes-Merton Pricing ---")
+    print(f"BSM European Call Price     : ${bsm_res['call_price']:,.2f}")
+    print(f"BSM European Put Price      : ${bsm_res['put_price']:,.2f}")
+    print(f"Put-Call Parity Error Check : {bsm_res['parity_error']}")
 
-    # Test Part 2: Duration, Convexity & Sensitivity
-    sens_res = compute_duration_and_convexity(F, C, y_init, T, k)
-    print("\n--- Part 2: Duration & Convexity ---")
-    print(f"Macaulay Duration       : {sens_res['macaulay_duration_years']} Years")
-    print(f"Modified Duration       : {sens_res['modified_duration_years']} Years")
-    print(f"Convexity               : {sens_res['convexity']}")
+    # Test Part 3: Option Greeks & Implied Volatility
+    greeks_res = compute_bsm_greeks(S0, K, r, sigma, T, q)
+    print("\n--- Part 3: Option Sensitivity Greeks ---")
+    print(f"Call Delta (\u0394)               : {greeks_res['delta_call']}")
+    print(f"Gamma (\u0393)                    : {greeks_res['gamma']}")
+    print(f"Vega (per +1% Vol)          : ${greeks_res['vega_1pct']:,.4f}")
+    print(f"Call Theta (Daily)          : ${greeks_res['theta_call_daily']:,.4f}")
 
-    # Price sensitivity for +200 bps yield shock (+0.02)
-    shock_res = estimate_price_change_taylor(
-        sens_res['modified_duration_years'], 
-        sens_res['convexity'], 
-        delta_y=0.02
-    )
-    print(f"\nYield Shock (+200 bps) Duration-Only Approx : {shock_res['duration_approx_pct']}%")
-    print(f"Yield Shock (+200 bps) Duration+Convexity  : {shock_res['duration_convexity_approx_pct']}%")
-
-    # Test Part 3: Money Market Rate Conversion (180-day T-Bill with 4.0% Discount Yield)
-    bey_res = convert_discount_to_bond_equivalent_yield(bank_discount_yield=0.04, days_to_maturity=180)
-    print("\n--- Part 3: Money Market Yield Conversion ---")
-    print(f"Bank Discount Yield (180d) : 4.0000%")
-    print(f"Bond Equivalent Yield (BEY): {bey_res * 100:.4f}%")
+    # Solve Implied Volatility from calculated call price
+    imp_vol_solved = solve_implied_volatility(bsm_res['call_price'], S0, K, r, T, q)
+    print(f"\nSolved Implied Volatility   : {imp_vol_solved * 100:.4f}%")
